@@ -1,0 +1,48 @@
+import os
+import torch
+from transformer_lens import HookedTransformer
+
+
+DEFAULT_MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"
+
+
+def hf_login(token=None):
+    token = token or os.environ.get("HF_TOKEN")
+    if token:
+        from huggingface_hub import login
+        login(token=token, add_to_git_credential=False)
+
+
+def pick_device():
+    if torch.cuda.is_available():
+        return "cuda"
+    if torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+
+def load_model(name=DEFAULT_MODEL, device=None, dtype=None, hf_token=None):
+    hf_login(hf_token)
+    device = device or pick_device()
+    if dtype is None:
+        dtype = torch.float16 if device != "cpu" else torch.float32
+    model = HookedTransformer.from_pretrained(
+        name,
+        device=device,
+        dtype=dtype,
+        default_padding_side="left",
+        fold_ln=False,
+        center_writing_weights=False,
+        center_unembed=False,
+    )
+    model.eval()
+    for p in model.parameters():
+        p.requires_grad_(False)
+    return model
+
+
+def free_memory():
+    import gc
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
