@@ -1,3 +1,18 @@
+# Project-specific
+.env
+*.env
+results/*.npy
+results/*.csv
+results/*.pkl
+results/*.png
+results/*.json
+!results/.gitkeep
+.cache/
+hf_cache/
+*.safetensors
+*.bin
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
