@@ -5,7 +5,6 @@ import seaborn as sns
 
 
 def bootstrap_ci(values, statistic=np.mean, n_boot=10000, alpha=0.05, seed=0):
-    """Percentile bootstrap CI for a 1-D sample. NaNs are dropped."""
     v = np.asarray(values, dtype=float)
     v = v[~np.isnan(v)]
     if len(v) == 0:
@@ -105,7 +104,6 @@ def patching_summary(records, with_ci=False):
 
 
 def commitment_summary_ci(records):
-    """Commitment summary with bootstrap CIs on the key quantities."""
     df = pd.DataFrame(records)
     cl = df["commitment_layer"].replace(-1, np.nan)
     out = commitment_summary(records)
@@ -116,13 +114,6 @@ def commitment_summary_ci(records):
 
 
 def threshold_sweep(all_probs, labels, taus=(0.5, 0.7, 0.8, 0.9)):
-    """Commitment-layer sensitivity to tau.
-
-    all_probs: (n_examples, n_layers, n_classes) array of logit-lens probs.
-    labels: length-n array of ground-truth class indices.
-    Returns a DataFrame: one row per (tau) with mean/median commitment depth
-    (as a layer index and depth fraction) and the committed fraction.
-    """
     arr = np.asarray(all_probs)
     labels = np.asarray(labels)
     n, n_layers, _ = arr.shape
@@ -145,11 +136,6 @@ def threshold_sweep(all_probs, labels, taus=(0.5, 0.7, 0.8, 0.9)):
 
 
 def qualitative_extremes(records, k=25, text_key="cot_text"):
-    """Return the k earliest- and k latest-commitment examples for manual review.
-
-    Only examples that committed (commitment_layer >= 0) are ranked. Each record
-    is expected to carry the CoT/answer text under text_key for inspection.
-    """
     df = pd.DataFrame(records)
     committed = df[df["commitment_layer"] >= 0].sort_values("commitment_layer")
     cols = [c for c in ["idx", "commitment_layer", "correct", "pred", "label_text", text_key]
@@ -160,11 +146,6 @@ def qualitative_extremes(records, k=25, text_key="cot_text"):
 
 
 def plot_commitment_compare(records_no_cot, records_with_cot, n_layers, ax=None):
-    """Overlay commitment-layer distributions: no-CoT baseline vs with-CoT.
-
-    This is the project's central comparison — a rationalization account predicts
-    the with-CoT distribution shifts earlier (shallower) than no-CoT.
-    """
     if ax is None:
         fig, ax = plt.subplots(figsize=(7, 4))
     for recs, name in [(records_no_cot, "no-CoT"), (records_with_cot, "with-CoT")]:
