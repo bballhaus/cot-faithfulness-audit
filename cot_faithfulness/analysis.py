@@ -4,6 +4,24 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
+def bootstrap_ci(values, statistic=np.mean, n_boot=10000, alpha=0.05, seed=0):
+    """Percentile bootstrap CI for a 1-D sample. NaNs are dropped."""
+    v = np.asarray(values, dtype=float)
+    v = v[~np.isnan(v)]
+    if len(v) == 0:
+        return {"point": float("nan"), "lo": float("nan"), "hi": float("nan"), "n": 0}
+    rng = np.random.default_rng(seed)
+    boots = np.empty(n_boot)
+    for b in range(n_boot):
+        boots[b] = statistic(v[rng.integers(0, len(v), len(v))])
+    return {
+        "point": float(statistic(v)),
+        "lo": float(np.percentile(boots, 100 * alpha / 2)),
+        "hi": float(np.percentile(boots, 100 * (1 - alpha / 2))),
+        "n": int(len(v)),
+    }
+
+
 def plot_layer_heatmap(probs, target_names, title=None, ax=None, vmin=0.0, vmax=1.0):
     arr = probs.numpy() if hasattr(probs, "numpy") else np.asarray(probs)
     if arr.ndim == 3:
@@ -67,12 +85,96 @@ def plot_commitment_histogram(records, n_layers, ax=None):
     return ax
 
 
-def patching_summary(records):
+def patching_summary(records, with_ci=False):
     df = pd.DataFrame(records)
-    return {
+    out = {
         "n": len(df),
         "flip_rate": df["flipped"].mean(),
         "mean_logit_drop": df["logit_diff_drop"].mean(),
         "accuracy_clean": df["correct_clean"].mean() if "correct_clean" in df else None,
         "accuracy_corrupted": df["correct_corrupted"].mean() if "correct_corrupted" in df else None,
     }
+    if "patch_recovers_clean" in df:
+        out["patch_recovery_rate"] = df["patch_recovers_clean"].mean()
+    if with_ci:
+        out["flip_rate_ci"] = bootstrap_ci(df["flipped"].astype(float))
+        out["mean_logit_drop_ci"] = bootstrap_ci(df["logit_diff_drop"])
+        if "patch_recovers_clean" in df:
+            out["patch_recovery_rate_ci"] = bootstrap_ci(df["patch_recovers_clean"].astype(float))
+    return out
+
+
+def commitment_summary_ci(records):
+    """Commitment summary with bootstrap CIs on the key quantities."""
+    df = pd.DataFrame(records)
+    cl = df["commitment_layer"].replace(-1, np.nan)
+    out = commitment_summary(records)
+    out["mean_commitment_layer_ci"] = bootstrap_ci(cl)
+    out["frac_committed_ci"] = bootstrap_ci((df["commitment_layer"] >= 0).astype(float))
+    out["accuracy_ci"] = bootstrap_ci(df["correct"].astype(float))
+    return out
+
+
+def threshold_sweep(all_probs, labels, taus=(0.5, 0.7, 0.8, 0.9)):
+    """Commitment-layer sensitivity to tau.
+
+    all_probs: (n_examples, n_layers, n_classes) array of logit-lens probs.
+    labels: length-n array of ground-truth class indices.
+    Returns a DataFrame: one row per (tau) with mean/median commitment depth
+    (as a layer index and depth fraction) and the committed fraction.
+    """
+    arr = np.asarray(all_probs)
+    labels = np.asarray(labels)
+    n, n_layers, _ = arr.shape
+    rows = []
+    for tau in taus:
+        commit = np.full(n, -1)
+        for i in range(n):
+            hits = np.where(arr[i, :, labels[i]] > tau)[0]
+            if len(hits):
+                commit[i] = hits[0]
+        valid = commit[commit >= 0].astype(float)
+        rows.append({
+            "tau": tau,
+            "frac_committed": float((commit >= 0).mean()),
+            "mean_layer": float(valid.mean()) if len(valid) else float("nan"),
+            "median_layer": float(np.median(valid)) if len(valid) else float("nan"),
+            "mean_depth_frac": float(valid.mean() / (n_layers - 1)) if len(valid) else float("nan"),
+        })
+    return pd.DataFrame(rows)
+
+
+def qualitative_extremes(records, k=25, text_key="cot_text"):
+    """Return the k earliest- and k latest-commitment examples for manual review.
+
+    Only examples that committed (commitment_layer >= 0) are ranked. Each record
+    is expected to carry the CoT/answer text under text_key for inspection.
+    """
+    df = pd.DataFrame(records)
+    committed = df[df["commitment_layer"] >= 0].sort_values("commitment_layer")
+    cols = [c for c in ["idx", "commitment_layer", "correct", "pred", "label_text", text_key]
+            if c in committed.columns]
+    early = committed.head(k)[cols].assign(group="early")
+    late = committed.tail(k)[cols].assign(group="late")
+    return pd.concat([early, late], ignore_index=True)
+
+
+def plot_commitment_compare(records_no_cot, records_with_cot, n_layers, ax=None):
+    """Overlay commitment-layer distributions: no-CoT baseline vs with-CoT.
+
+    This is the project's central comparison — a rationalization account predicts
+    the with-CoT distribution shifts earlier (shallower) than no-CoT.
+    """
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(7, 4))
+    for recs, name in [(records_no_cot, "no-CoT"), (records_with_cot, "with-CoT")]:
+        cl = pd.DataFrame(recs)["commitment_layer"]
+        cl = cl[cl >= 0]
+        sns.histplot(cl, bins=n_layers, stat="density", element="step",
+                     fill=False, label=name, ax=ax)
+    ax.axvline(0, color="grey", alpha=0.3)
+    ax.set_xlabel("commitment layer (τ=0.8)")
+    ax.set_ylabel("density")
+    ax.set_title("Commitment depth: no-CoT vs with-CoT")
+    ax.legend()
+    return ax
