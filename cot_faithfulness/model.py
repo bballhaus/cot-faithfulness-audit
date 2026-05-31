@@ -5,10 +5,7 @@ from transformer_lens import HookedTransformer
 
 DEFAULT_MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"
 
-# Instruct models supported by TransformerLens that expose residual streams,
-# usable for the cross-family generalization check. They use different chat
-# templates, so prompt construction must go through prompts.format_chat
-# (tokenizer.apply_chat_template) rather than the hand-built Llama-3 template.
+# Cross-family check; use prompts.format_chat (these need their own chat templates).
 ALT_MODELS = {
     "mistral-7b": "mistralai/Mistral-7B-Instruct-v0.2",
     "gemma-2-9b": "google/gemma-2-9b-it",

@@ -1,11 +1,3 @@
-"""Tuned lens: per-layer affine translators that map an intermediate residual
-to the final-layer residual before the shared unembedding (Belrose et al. 2023).
-
-Each translator is initialized to the identity, so an untrained TunedLens is
-exactly the logit lens. Training minimizes KL(tuned_layer || model_final) on a
-calibration set, sharpening the early/middle-layer readouts the logit lens is
-known to distort.
-"""
 import torch
 import torch.nn as nn
 
@@ -16,7 +8,6 @@ class TunedLens(nn.Module):
         self.n_layers = n_layers
         self.rank = rank
         if rank is None:
-            # Full affine delta, initialized to zero -> identity translator.
             self.translators = nn.ModuleList(
                 [nn.Linear(d_model, d_model, bias=True) for _ in range(n_layers)]
             )
@@ -24,7 +15,6 @@ class TunedLens(nn.Module):
                 nn.init.zeros_(lin.weight)
                 nn.init.zeros_(lin.bias)
         else:
-            # Low-rank delta U V^T, U init zero -> identity translator.
             self.U = nn.ParameterList(
                 [nn.Parameter(torch.zeros(d_model, rank)) for _ in range(n_layers)]
             )
@@ -52,20 +42,13 @@ def _teacher_and_resids(model, tokens, positions):
     resids = torch.stack(
         [cache[f"blocks.{L}.hook_resid_post"][0, positions]
          for L in range(model.cfg.n_layers)]
-    )  # (n_layers, n_pos, d_model)
+    )
     del cache
     return teacher.cpu(), resids.cpu()
 
 
 def fit_tuned_lens(model, token_seqs, positions_per_seq=None, rank=None,
                    steps=250, lr=1e-3, batch_layers=None, device=None, seed=0):
-    """Train translators against the model's own final distribution.
-
-    token_seqs: list of [1, seq] token tensors (calibration prompts).
-    positions_per_seq: optional list of position lists; defaults to the last
-        token of each sequence (the answer-scoring position).
-    Returns a fitted TunedLens (on CPU; move with .to(device) before use).
-    """
     torch.manual_seed(seed)
     device = device or next(model.parameters()).device
     d_model = model.cfg.d_model
@@ -78,8 +61,8 @@ def fit_tuned_lens(model, token_seqs, positions_per_seq=None, rank=None,
         t, r = _teacher_and_resids(model, toks, pos)
         teachers.append(t)
         resids.append(r)
-    teacher = torch.cat(teachers, dim=0).to(device)        # (N, vocab) log-probs
-    resid = torch.cat([r.permute(1, 0, 2) for r in resids], dim=0).to(device)  # (N, L, d)
+    teacher = torch.cat(teachers, dim=0).to(device)
+    resid = torch.cat([r.permute(1, 0, 2) for r in resids], dim=0).to(device)
 
     lens = TunedLens(d_model, n_layers, rank=rank).to(device)
     W_U = model.unembed.W_U.detach()
@@ -96,7 +79,6 @@ def fit_tuned_lens(model, token_seqs, positions_per_seq=None, rank=None,
                 h = model.ln_final(h)
                 logits = (h @ W_U + b_U).float()
                 logp = torch.log_softmax(logits, dim=-1)
-                # KL(teacher || student) with teacher fixed.
                 loss = loss + torch.nn.functional.kl_div(
                     logp, teacher, log_target=True, reduction="batchmean"
                 )
@@ -109,10 +91,6 @@ def fit_tuned_lens(model, token_seqs, positions_per_seq=None, rank=None,
 
 @torch.no_grad()
 def tuned_lens_probs(model, lens, tokens, target_ids, positions=None):
-    """Mirror of logit_lens.logit_lens but through trained translators.
-
-    Returns (n_layers, n_positions, n_targets) on CPU.
-    """
     if tokens.dim() == 1:
         tokens = tokens.unsqueeze(0)
     device = next(model.parameters()).device
