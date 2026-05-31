@@ -46,6 +46,19 @@ def format_mnli_direct(premise, hypothesis):
     return _llama3_chat(MNLI_SYSTEM, user, "Answer:")
 
 
+def format_chat(model, system, user, assistant_prefix=""):
+    """Model-agnostic chat formatting via the HF tokenizer's chat template.
+
+    Use this for non-Llama-3 models in the cross-family generalization check;
+    the hand-built _llama3_chat template above is only correct for Llama 3.
+    """
+    msgs = [{"role": "system", "content": system}, {"role": "user", "content": user}]
+    text = model.tokenizer.apply_chat_template(
+        msgs, tokenize=False, add_generation_prompt=True
+    )
+    return text + assistant_prefix
+
+
 def _first_token(model, s):
     ids = model.to_tokens(s, prepend_bos=False).squeeze().tolist()
     return ids[0] if isinstance(ids, list) else ids

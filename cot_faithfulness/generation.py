@@ -2,7 +2,22 @@ import re
 import torch
 
 
-ANSWER_RE = re.compile(r"answer\s*[:\-]\s*([A-Za-z]+)", re.IGNORECASE)
+# "Answer: entailment", "Answer - No", "**Answer:** Yes", "final answer is contradiction"
+ANSWER_RE = re.compile(
+    r"(?:final\s+answer|answer)\s*(?:is|:|-|—)?\s*\**\s*([A-Za-z]+)",
+    re.IGNORECASE,
+)
+
+# Phrases Llama-3 Instruct uses instead of the requested "Answer:" line.
+_HEDGE_PATTERNS = [
+    r"the\s+(?:correct\s+)?(?:relationship|label|answer)\s+is\s+\**\s*([A-Za-z]+)",
+    r"this\s+is\s+(?:a\s+case\s+of\s+)?\**\s*([A-Za-z]+)",
+    r"therefore[,\s]+(?:the\s+answer\s+is\s+)?\**\s*([A-Za-z]+)",
+    r"\bso\s+(?:the\s+answer\s+is\s+)?\**\s*([A-Za-z]+)",
+]
+_HEDGE_RES = [re.compile(p, re.IGNORECASE) for p in _HEDGE_PATTERNS]
+
+ANSWER_LEAD = "\nAnswer:"
 
 
 @torch.no_grad()
@@ -22,13 +37,30 @@ def generate_cot(model, prompt, max_new_tokens=180, temperature=0.0, stop_str="<
     return completion.strip(), out
 
 
+def _match_choice(guess, choices):
+    guess = guess.strip().lower()
+    for c in choices:
+        cl = c.lower()
+        if guess.startswith(cl) or cl.startswith(guess):
+            return c
+    return None
+
+
 def parse_answer(completion, choices):
-    m = ANSWER_RE.search(completion)
-    if m:
-        guess = m.group(1).strip().lower()
-        for c in choices:
-            if guess.startswith(c.lower()) or c.lower().startswith(guess):
-                return c
+    """Best-effort text parse. Returns a canonical choice or None.
+
+    Tries, in order: an explicit 'Answer:' line (last occurrence), known hedge
+    phrases, then the last standalone mention of any choice word.
+    """
+    for m in reversed(list(ANSWER_RE.finditer(completion))):
+        hit = _match_choice(m.group(1), choices)
+        if hit:
+            return hit
+    for rx in _HEDGE_RES:
+        for m in reversed(list(rx.finditer(completion))):
+            hit = _match_choice(m.group(1), choices)
+            if hit:
+                return hit
     lc = completion.lower()
     hits = [(c, lc.rfind(c.lower())) for c in choices]
     hits = [(c, i) for c, i in hits if i >= 0]
@@ -37,9 +69,34 @@ def parse_answer(completion, choices):
     return None
 
 
-def split_cot_and_answer(model, full_tokens, prompt_tokens):
-    prompt_len = prompt_tokens.shape[1]
-    cot_start = prompt_len
-    full_text = model.to_string(full_tokens[0])
-    answer_match = ANSWER_RE.search(full_text[len(model.to_string(prompt_tokens[0])):])
-    return cot_start, full_tokens.shape[1], answer_match
+def split_completion(completion):
+    """Split a generation into (cot_text, answer_text).
+
+    cot_text is everything before the final answer marker; answer_text is the
+    matched answer word (or None). Used to bound the CoT span so corruption and
+    answer-scoring never touch the answer line itself.
+    """
+    matches = list(ANSWER_RE.finditer(completion))
+    if matches:
+        m = matches[-1]
+        return completion[: m.start()].rstrip(), m.group(1)
+    return completion.rstrip(), None
+
+
+def build_answer_scoring_tokens(model, prompt, cot_text, answer_lead=ANSWER_LEAD):
+    """Reconstruct a clean prompt + CoT + 'Answer:' sequence for scoring.
+
+    Returns (tokens [1, seq], score_pos, cot_span). The next-token distribution
+    at score_pos is the class prediction immediately after 'Answer:'. cot_span
+    = (start, end) indexes the CoT tokens only, excluding the answer line — so
+    token-level corruption stays clear of the answer marker.
+    """
+    prompt_tokens = model.to_tokens(prompt)
+    cot_lead = prompt + (cot_text + " " if cot_text else "")
+    cot_lead_tokens = model.to_tokens(cot_lead)
+    full_text = cot_lead + answer_lead
+    tokens = model.to_tokens(full_text)
+    cot_start = prompt_tokens.shape[1]
+    cot_end = cot_lead_tokens.shape[1]
+    score_pos = tokens.shape[1] - 1
+    return tokens, score_pos, (cot_start, cot_end)
