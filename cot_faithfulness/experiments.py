@@ -1,12 +1,3 @@
-"""High-level experiment runners shared by the final-report notebook.
-
-Two families:
-  run_commitment  -> logit-lens commitment depth, with-CoT or no-CoT.
-  run_corruption  -> CoT corruption (random / shuffle / invert) + pre-CoT patch.
-
-Both keep target-id ordering aligned with the dataset's integer labels, so an
-argmax index is directly a label index.
-"""
 import numpy as np
 import torch
 from tqdm.auto import tqdm
@@ -14,7 +5,6 @@ from tqdm.auto import tqdm
 from . import data, prompts, generation, logit_lens, patching, model as model_mod
 
 
-# kind -> (example_fn, cot_prompt_fn, direct_prompt_fn, choices_in_label_order)
 def _spec(kind, model):
     if kind == "boolq":
         t = prompts.boolq_target_tokens(model)

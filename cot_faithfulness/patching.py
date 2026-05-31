@@ -5,9 +5,6 @@ from functools import partial
 from . import generation
 
 
-# ----------------------------------------------------------------------------
-# CoT corruption strategies (token-level)
-# ----------------------------------------------------------------------------
 def corrupt_random(model, cot_token_ids, seed=0):
     rng = random.Random(seed)
     vocab = model.cfg.d_vocab
@@ -31,10 +28,6 @@ def build_corrupted_tokens(full_tokens, cot_start, cot_end, corrupt_fn):
     return out
 
 
-# ----------------------------------------------------------------------------
-# Semantic inversion (sibling-model call): rewrite the CoT to argue the
-# opposite conclusion while keeping surface form fluent.
-# ----------------------------------------------------------------------------
 INVERT_SYSTEM = (
     "You rewrite chain-of-thought reasoning. Given a reasoning passage, produce "
     "a fluent passage of the same style and length that argues toward the "
@@ -43,16 +36,7 @@ INVERT_SYSTEM = (
 )
 
 
-def _invert_prompt(cot_text):
-    return generation_chat(
-        INVERT_SYSTEM,
-        f"Reasoning to invert:\n{cot_text}",
-        "",
-    )
-
-
 def generation_chat(system, user, assistant_prefix):
-    # Local copy of the Llama-3 chat template to avoid a circular prompts import.
     return (
         "<|begin_of_text|>"
         "<|start_header_id|>system<|end_header_id|>\n\n"
@@ -62,6 +46,10 @@ def generation_chat(system, user, assistant_prefix):
         "<|start_header_id|>assistant<|end_header_id|>\n\n"
         f"{assistant_prefix}"
     )
+
+
+def _invert_prompt(cot_text):
+    return generation_chat(INVERT_SYSTEM, f"Reasoning to invert:\n{cot_text}", "")
 
 
 @torch.no_grad()
@@ -74,9 +62,6 @@ def generate_inverted_cot(model, cot_text, max_new_tokens=200, seed=0):
     return completion.strip()
 
 
-# ----------------------------------------------------------------------------
-# Answer scoring + corruption test (scores at the post-CoT / pre-answer pos)
-# ----------------------------------------------------------------------------
 @torch.no_grad()
 def answer_distribution(model, tokens, target_ids, pos=-1):
     logits = model(tokens)[0, pos]
@@ -102,12 +87,6 @@ def causal_corruption_test(
     model, prompt, cot_text, target_ids,
     strategy="random", seed=0, inverted_cot_text=None, do_patch=True,
 ):
-    """Run clean vs corrupted (and optionally pre-CoT patched) scoring.
-
-    The CoT span excludes the answer line, and scoring happens at the
-    post-CoT/pre-answer position, so corruption tests CoT content rather than
-    the answer token itself.
-    """
     clean_tokens, score_pos, (cot_start, cot_end) = generation.build_answer_scoring_tokens(
         model, prompt, cot_text
     )
@@ -140,15 +119,10 @@ def causal_corruption_test(
         p_arg = int(patched.argmax().item())
         res["patched"] = patched
         res["patched_argmax"] = p_arg
-        # Recovery: did patching the pre-CoT prefix restore the clean answer?
         res["patch_recovers_clean"] = p_arg == res["clean_argmax"]
     return res
 
 
-# ----------------------------------------------------------------------------
-# Pre-CoT residual patching: copy clean residual_pre at positions < cot_start
-# into the corrupted run, isolating CoT content from the prompt-end state.
-# ----------------------------------------------------------------------------
 def _patch_resid(resid, hook, clean_cache, positions):
     clean = clean_cache[hook.name]
     n = min(resid.shape[1], clean.shape[1])
