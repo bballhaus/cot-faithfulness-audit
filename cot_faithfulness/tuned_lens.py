@@ -27,7 +27,10 @@ class TunedLens(nn.Module):
 
     def forward(self, resid, layer):
         if self.rank is None:
+            w = self.translators[layer].weight
+            resid = resid.to(w.dtype)
             return resid + self.translators[layer](resid)
+        resid = resid.to(self.U[layer].dtype)
         return resid + (resid @ self.V[layer].t()) @ self.U[layer].t() + self.bias[layer]
 
 
@@ -76,7 +79,7 @@ def fit_tuned_lens(model, token_seqs, positions_per_seq=None, rank=None,
             loss = 0.0
             for L in layers:
                 h = lens(resid[:, L], L)
-                h = model.ln_final(h)
+                h = model.ln_final(h.to(W_U.dtype))
                 logits = (h @ W_U + b_U).float()
                 logp = torch.log_softmax(logits, dim=-1)
                 loss = loss + torch.nn.functional.kl_div(
@@ -101,11 +104,12 @@ def tuned_lens_probs(model, lens, tokens, target_ids, positions=None):
         positions = list(range(tokens.shape[1]))
     pos_t = torch.tensor(positions, device=device)
     targets = torch.tensor(target_ids, device=device)
+    mdtype = model.unembed.W_U.dtype
     out = torch.zeros(n_layers, len(positions), len(target_ids))
     for L in range(n_layers):
         resid = cache[f"blocks.{L}.hook_resid_post"][0].index_select(0, pos_t)
         resid = lens(resid, L)
-        resid = model.ln_final(resid)
+        resid = model.ln_final(resid.to(mdtype))
         logits = model.unembed(resid).float()
         probs = torch.softmax(logits, dim=-1)
         out[L] = probs.index_select(1, targets).cpu()
