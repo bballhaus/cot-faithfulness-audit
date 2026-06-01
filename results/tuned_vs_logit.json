@@ -1,0 +1,16 @@
+{
+  "logit_lens_mean_commit": {
+    "point": 29.36,
+    "lo": 29.2,
+    "hi": 29.515,
+    "n": 200
+  },
+  "tuned_lens_mean_commit": {
+    "point": 7.390134529147982,
+    "lo": 6.802690582959642,
+    "hi": 8.0,
+    "n": 223
+  },
+  "logit_frac_committed": 0.8,
+  "tuned_frac_committed": 0.892
+}

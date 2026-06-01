@@ -1,0 +1,99 @@
+idx,commitment_layer,correct,pred,label_text,cot_text,group
+1391,27,True,0,No,"The passage states that the UK government invoked Article 50 on 29 March 2017, which started the process of leaving the EU. It also mentions that the UK is due to leave the EU on 29 March 2019. However, it does not state that the UK has actually left the EU yet.
+
+Therefore, the answer is:",early
+460,27,True,0,No,"The passage states that the Voting Rights Act banned the use of literacy tests in all jurisdictions in which less than 50% of voting-age residents were registered as of November 1, 1964, or had voted in the 1964 presidential election. Later, the ban was expanded to the entire country in 1970. This suggests that literacy tests were previously used to restrict voting rights, and the ban was enacted to prevent this.
+
+However, the passage does not explicitly state that one must be literate to vote. Instead, it focuses on the prohibition of literacy tests, which were used to restrict voting rights based on literacy.
+
+Therefore, the answer is:",early
+467,27,True,0,No,,early
+1015,27,True,0,No,"The passage states that Port Louis is home to the biggest port facility in the Indian Ocean region. This implies that Port Louis is located in the Indian Ocean. The Indian Ocean is not the Atlantic Ocean, but it is also not the Pacific Ocean. Therefore, the correct answer is:",early
+597,27,True,0,No,"The passage mentions that Danica Patrick has the best result with a third place in 2009, but it doesn't mention her winning the race. It also mentions that Lyn St. James, Patrick, and Simona de Silvestro have all won the Rookie of the Year Award, but it doesn't mention any of them winning the Indianapolis 500.
+
+Therefore, the answer is:",early
+249,27,True,0,No,"The passage states that a lower level resolution is often used instead of a caution, which is called a 'community resolution'. This community resolution does not require arrest. However, it does not explicitly state that a caution can be given without arrest. 
+
+So, the answer is:",early
+1411,29,True,0,No,"The passage doesn't mention anything about the film being based on a true story. It talks about the film's style, influence, and critical acclaim, but doesn't provide any information about its basis in reality. Therefore, the answer is:",early
+1422,29,True,0,No,"The passage mentions that Ty Burr of The Boston Globe compared the film to the works of Studio Ghibli. However, it does not mention that the film ""The Girl Who Leapt Through Time"" is actually produced by Studio Ghibli. It only mentions that the film shares similarities with Ghibli's style. Therefore, the answer is:",early
+1309,29,True,0,No,"The passage states that the show concluded on May 18, 2018, and there is no mention of a season 8. Therefore, the answer is:",early
+1311,29,True,0,No,"The passage mentions that Ben's son, Trevor, is the main character of Ben's next novel. It also mentions that Trevor is 21 years old and is lying on the floor on his birthday, but it doesn't say he actually dies. In fact, it says that Trevor was faking his death. Therefore, the answer is:",early
+1315,29,True,0,No,"The passage mentions that the game was released for the PlayStation 3, but it doesn't mention the PlayStation 4. However, it doesn't explicitly state that it's not available on PS4 either.
+
+But, since the passage doesn't provide information about the game's availability on PS4, we can't conclude that it's a PS4 exclusive.",early
+1317,29,True,0,No,"The passage doesn't mention anything about the TV show ""Ascension"" being based on a book. It only talks about the show's creation, production, and airing. Therefore, the answer is:",early
+1363,29,True,0,No,"The passage states that the screenplay is ""based on the true story"" of Herman Boone and the integration of the T.C. Williams High School football team. This implies that the story is based on real events, but it does not explicitly state that it is based on a book.
+
+However, the passage does not mention a book as the source material. Therefore, I conclude that the answer is:",early
+1375,29,True,0,No,"According to the passage, New Hampshire is a constitutional carry state, which means that no license is required to open carry or concealed carry a firearm in public. However, concealed carry permits are still issued for purposes of reciprocity with other states.
+
+So, the answer is:",early
+1299,29,True,0,No,"The passage doesn't mention the movie ""Get Out"" being based on a book. It only mentions the director, Jordan Peele, and the cast of the movie. Therefore, the answer is:",early
+1349,29,True,0,No,"The passage states that a new ""Super"" judgment was added between ""Good"" and ""Perfect"". This implies that ""Super"" is not better than ""Perfect"", but rather a new level of judgment that is higher than ""Good"" but lower than ""Perfect"". Therefore, the answer is:",early
+1232,29,True,0,No,"The passage mentions that the pilot episode was filmed at CBS Radford, but it doesn't specify where the rest of the episodes were filmed. It does mention that the show was based in Los Angeles, but it doesn't mention filming in New York. Therefore, the answer is:",early
+1218,29,True,0,No,"The passage states that the names of chemical compounds and chemical elements are common nouns in English, and are capitalized at the beginning of a sentence or title, but not elsewhere. It also notes that the chemical symbol is always capitalized. 
+
+However, the passage also states that the names of elements are uncapitalized, except for the chemical symbol. 
+
+So, the answer is:",early
+1288,29,True,0,No,"The passage states that the sale of firearms by private sellers, including those done at gun shows, are exempt from federal background check requirements. This means that private sellers, including those at gun shows, do not have to conduct background checks on their customers. Therefore, the answer is:",early
+1262,29,True,0,No,"The passage states that the act does not outlaw consumption of alcohol by those under 21, but only its purchase. It also mentions that some states extended the law to ban consumption altogether. However, it does not mention that all states enforce a minimum drinking age of 21.
+
+Therefore, the answer is:",early
+1058,29,True,0,No,"The passage states that per capita income is often used to measure a country's standard of living, and it is usually expressed in terms of a commonly used international currency. It also mentions that per capita income is easily calculable from readily available gross domestic product (GDP) and population estimates. This suggests that per capita income is related to GDP, but it's not explicitly stated that they are the same thing.
+
+However, the passage does not provide enough information to conclude that GDP per capita is the same as per capita income. Therefore, I would say:",early
+1193,29,True,0,No,"The passage doesn't mention anything about the movie being based on a true story. It only talks about the production process, casting, and the title change. Therefore, the answer is:",early
+1055,29,True,0,No,"The passage doesn't mention Kate being a child. It only talks about Stephen seeing his parents as a young couple in a pub before they married. It also mentions Stephen's grief and loss of a child, but it doesn't specify Kate being the child. Therefore, the answer is:",early
+1199,29,True,0,No,"The passage states that the Suns have made it to the NBA Finals twice, in 1976 and 1993. However, it also states that they have never won an NBA championship. Therefore, the answer is:",early
+912,29,True,0,No,"1. The passage mentions that Australia has three main time zones: AWST, ACST, and AEST. 2. These time zones are UTC+08:00, UTC+09:30, and UTC+10:00, respectively. 3. This means that different parts of Australia are in different time zones. 4. The passage also mentions that some states observe daylight saving time, which could further complicate the time zones.",early
+547,30,True,0,No,"The passage mentions that the 1916 New York Giants hold the record for the longest unbeaten streak, but it doesn't say they went undefeated. It says they had a tie in-between the 14th and 15th win, which means they didn't win every game. 
+
+The passage also mentions other teams' winning streaks, but it doesn't mention any team going undefeated.",late
+546,30,True,1,Yes,"1. The passage states that the muscular system consists of skeletal, smooth, and cardiac muscles. 2. Cardiac muscle is mentioned as one of the types of muscles in the muscular system. 3. The passage also mentions that the cardiac muscle is an exception, as it can be completely autonomous, meaning it doesn't always need control from the nervous system.",late
+545,30,True,0,No,"1. The passage mentions that the Minister responsible for the Territories excluding the Falkland Islands, Gibraltar, and the Sovereign Base Areas is Tariq Ahmad. 2. This implies that the Falkland Islands are not part of the territories under Tariq Ahmad's responsibility. 3. The passage does not mention the Falkland Islands being part of the Commonwealth or any other group.",late
+544,30,True,1,Yes,"1. The passage states that Guernsey has been in currency union with the United Kingdom since 1921. 2. This means that the Guernsey pound is not a separate currency, but rather a local issue of banknotes and coins denominated in pound sterling. 3. The passage also mentions that the Guernsey pound can be exchanged at par with other sterling coinage and notes. 4. This implies that the Guernsey pound is equivalent to the pound sterling.",late
+87,31,True,1,Yes,"The passage states that alligators may kill larger prey by grabbing it and dragging it into the water to drown. This suggests that alligators do indeed drown their prey. However, it also mentions that they consume food that cannot be eaten in one bite by allowing it to rot, or by biting and then spinning or convulsing wildly until bite-sized chunks are torn off. This implies that they do not always eat their prey immediately after drowning it.",late
+529,31,True,1,Yes,"The passage states that Dying Light: The Following -- Enhanced Edition includes Dying Light, Dying Light: The Following, and downloadable content released for the original game. This implies that the Enhanced Edition does not come with the base game, but rather includes the base game itself.",late
+83,31,True,1,Yes,"The passage states that most seat belt laws are left to the states, which implies that some states may have their own laws. However, it also mentions that New Hampshire is the only state that has no enforceable laws for the wearing of seat belts in a vehicle.",late
+388,31,True,1,Yes,"The passage states that as of May 30, 2009, there were 165,372 remaining $1,000 bills. This means that there were still some $1,000 bills in circulation. However, the passage also mentions that the Federal Reserve began taking high-denomination currency out of circulation in 1969, which means that the number of $1,000 bills in circulation has likely decreased since then.
+
+Despite this, the passage does not explicitly state that there are no $1,000 bills in circulation. It only mentions that there are a certain number remaining, which suggests that there may still be some in circulation.",late
+208,31,True,1,Yes,"The passage mentions that Spanish colonists brought the olive to the New World, and it was first planted in Lima, Peru in 1560. Then, it spread to California, where it was first cultivated at Mission San Diego de Alcalá in 1769 or later around 1795. However, an inspection in 1838 found only two olive orchards in California. It wasn't until the 1860s that cultivation for oil became a successful commercial venture.
+
+The passage does not explicitly state that olives cannot be grown in the United States, but it does mention that the majority of olive trees are found in Mediterranean countries, with traditionally marginal areas accounting for a small percentage of olive-planted area and oil production.",late
+265,31,True,1,Yes,"1. The passage mentions that there is a free passage of civilian ships between the international waters of the Black and the Mediterranean Seas. 2. However, it also mentions that Turkey has control over the straits connecting the two seas. 3. The 1982 amendments allow Turkey to close the straits at its discretion.
+
+From this, we can conclude that while there is a free passage in theory, Turkey has the power to restrict or close it. Therefore, the answer is:",late
+428,31,True,1,Yes,1. Bank of America acquired Merrill Lynch in January 2009. 2. The corporate and investment banking activities of Bank of America and Merrill Lynch were combined. 3. The combined entity is now known as Bank of America Merrill Lynch.,late
+1229,31,True,0,No,"The passage states that the fictional town of Cabot Cove is derived from the name of an actual bay harbor inlet in Kennebunkport, Maine. This means that there is a real place called Cabot Cove in Maine, but it's not a town, rather a bay harbor inlet. Therefore, the answer is:",late
+317,31,True,0,No,"The passage states that a trade secret ""continues indefinitely as long as the secret is not revealed to the public"". This means that as long as the secret remains confidential, there is no time limit on it. However, if the secret is revealed to the public, it loses its status as a trade secret.",late
+320,31,True,0,No,1. Guido is caught by a German soldier and is led off to be executed. 2. He is shot and left for dead in an alleyway.,late
+1146,31,True,1,Yes,"1. The passage mentions ""le lac Léman"" as one of the names for the lake. 2. It also mentions ""le lac de Genève"" as another name for the lake. 3. ""Lake Geneva"" is mentioned as a translation of ""le lac de Genève"". 4. ""Lac Léman"" is not explicitly mentioned as being the same as ""Lake Geneva"", but they are both referring to the same lake.",late
+799,31,True,0,No,"1. The passage defines a physical quantity as a combination of a magnitude and a unit. 2. The magnitude is expressed by a number, usually a real number. 3. The passage states that the same physical quantity can be represented equivalently in many unit systems. 4. This means that the physical quantity remains the same, but the unit changes.
+
+From this, we can conclude that the magnitude of a physical quantity does not change with the change in the system of units. The magnitude is the numerical value, which remains the same, while the unit changes.",late
+1427,31,True,1,Yes,"The passage states that a conductor used to connect to a system neutral is also used for grounding (earthing) of equipment and structures. This implies that a neutral wire can be connected to ground. However, the passage also mentions that care must be taken to ensure the neutral conductor never rises to a high voltage with respect to local ground. This suggests that there are conditions under which a neutral wire cannot be connected to ground.",late
+1041,31,True,0,No,"1. The passage states that the show attracts participants from ""across the United States and abroad"". 2. This implies that participants do not have to be from America to be on the show. 3. The passage does not specify any restrictions on nationality or residency.",late
+603,31,True,0,No,"The passage states that ""A jungle is land covered with dense vegetation dominated by trees."" It also mentions that ""tropical rainforests were generally referred to as jungles"" before the 1970s. This suggests that jungles and rainforests are related, but not necessarily the same thing. The passage does not explicitly state that they are the same, but it does imply a connection between the two terms.",late
+1314,31,True,0,No,"1. The passage states that in most countries, it is legal to cultivate the San Pedro cactus. 2. However, in countries where possession of mescaline and related compounds is illegal and highly penalized, cultivation for consumption is likely illegal and highly penalized. 3. The passage lists the United States as one of these countries where possession of mescaline and related compounds is illegal and highly penalized. 4. Therefore, it is likely that cultivating the San Pedro cactus for consumption in the United States is illegal and highly penalized.",late
+1456,31,True,1,Yes,"1. Until the early 1960s, most front turn signals emitted white light. 2. In the 1960s, the auto industry in the USA adopted amber front-turn signals. 3. However, it wasn't until the 1968 model year that amber became the only permissible front turn signal color. 4. Presently, most countries outside of the United States and Canada require amber front turn signals.",late
+820,31,True,1,Yes,"The passage defines local extrema as the largest and smallest value of the function within a given range. It also defines absolute extrema as the largest and smallest value of the function on the entire domain. 
+
+Now, a local maximum is the largest value of the function within a given range, but it's not necessarily the largest value of the function on the entire domain. Therefore, a local maximum can be a smaller value than the global maximum.
+
+So, the answer is:",late
+1250,31,True,1,Yes,"The passage states that the EEA agreement grants Norway access to the EU's single market. This means that Norway is not a member of the EU, but it has an agreement that allows it to participate in the single market.
+
+Reason 1: The passage explicitly states that Norway is not a member of the EU, but has an agreement (EEA) that grants it access to the single market.
+
+Reason 2: The passage does not mention Norway being a member of the EU, but rather mentions the EEA agreement, which is a separate entity.",late
+1056,31,True,0,No,"The passage states that studies have been inconclusive about the correlation between flat feet and physical injuries in soldiers, but none suggests that flat feet are an impediment for soldiers who reached the age of military recruitment without prior foot problems. This means that having flat feet alone is not a reason to be excluded from the military.
+
+Additionally, the passage mentions a study that found no impact of flat feet on physical functioning, injury rates, or foot health in Royal Australian Air Force recruits. Another study found that those with flat feet might even have fewer injuries.
+
+The only potential issue mentioned is that high arched feet might be associated with more stress fractures, but this is not a guarantee and is not a reason to exclude someone from the military.
+
+Therefore, based on the passage, it seems that being flat footed will not necessarily keep you out of the military.",late
+988,31,True,1,Yes,1. The passage states that citizens holding a national identity card with EEA or Swiss citizenship can use it as a travel document to exercise the right of free movement in the EEA and Switzerland. 2. The passage also states that identity cards that do not state EEA or Swiss citizenship are not valid as a travel document within the EEA and Switzerland.,late
