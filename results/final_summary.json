@@ -201,5 +201,57 @@
       "hi": 0.68,
       "n": 25
     }
+  },
+  "boolq_corruption_random": {
+    "n": 800,
+    "flip_rate": 0.11125,
+    "mean_logit_drop": 0.1309297078475356,
+    "accuracy_clean": 0.83875,
+    "accuracy_corrupted": 0.8125,
+    "patch_recovery_rate": 0.88875,
+    "flip_rate_ci": {
+      "point": 0.11125,
+      "lo": 0.09,
+      "hi": 0.13375,
+      "n": 800
+    },
+    "mean_logit_drop_ci": {
+      "point": 0.1309297078475356,
+      "lo": 0.11430131579469889,
+      "hi": 0.14843402708414943,
+      "n": 800
+    },
+    "patch_recovery_rate_ci": {
+      "point": 0.88875,
+      "lo": 0.86625,
+      "hi": 0.91,
+      "n": 800
+    }
+  },
+  "boolq_corruption_invert": {
+    "n": 300,
+    "flip_rate": 0.4266666666666667,
+    "mean_logit_drop": 0.405367884238561,
+    "accuracy_clean": 0.8466666666666667,
+    "accuracy_corrupted": 0.5133333333333333,
+    "patch_recovery_rate": 0.6066666666666667,
+    "flip_rate_ci": {
+      "point": 0.4266666666666667,
+      "lo": 0.37,
+      "hi": 0.48333333333333334,
+      "n": 300
+    },
+    "mean_logit_drop_ci": {
+      "point": 0.405367884238561,
+      "lo": 0.35562047524253526,
+      "hi": 0.4551867923935254,
+      "n": 300
+    },
+    "patch_recovery_rate_ci": {
+      "point": 0.6066666666666667,
+      "lo": 0.55,
+      "hi": 0.66,
+      "n": 300
+    }
   }
 }
