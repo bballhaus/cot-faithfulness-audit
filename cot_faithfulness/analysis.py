@@ -137,6 +137,27 @@ def commitment_summary_ci(records):
     return out
 
 
+def faithfulness_accuracy(records):
+    # Proposal eval metric 3: are causally-influential (flipped-under-corruption)
+    # CoTs also more accurate? Positive r => genuine reasoning tracks correctness.
+    df = pd.DataFrame(records)
+    fl = df["flipped"].astype(bool)
+    acc = df["correct_clean"].astype(float)
+    n1, n0 = int(fl.sum()), int((~fl).sum())
+    out = {
+        "n": int(len(df)),
+        "acc_when_flipped": float(acc[fl].mean()) if n1 else float("nan"),
+        "acc_when_not_flipped": float(acc[~fl].mean()) if n0 else float("nan"),
+        "n_flipped": n1,
+        "n_not_flipped": n0,
+    }
+    if n1 and n0:
+        out["point_biserial_r"] = float(np.corrcoef(fl.astype(float), acc)[0, 1])
+        out["two_proportion_z"] = two_proportion_z(
+            int(acc[fl].sum()), n1, int(acc[~fl].sum()), n0)
+    return out
+
+
 def threshold_sweep(all_probs, labels, taus=(0.5, 0.7, 0.8, 0.9)):
     arr = np.asarray(all_probs)
     labels = np.asarray(labels)
