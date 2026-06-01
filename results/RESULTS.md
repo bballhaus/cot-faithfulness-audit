@@ -74,13 +74,15 @@ A **~22-layer gap**: once per-layer representational drift is corrected, the ans
 
 > **Caveat (state this in the report):** the tuned lens is a *trained* probe fit to predict the model's final output, so it can extract answer-correlated features the model is not yet acting on. The honest claim is "answer-relevant information is **decodable** by layer ~7," and the contribution is the **32 → 7 gap**, which quantifies how much the logit lens underestimates early information. Do not report "the model commits at layer 7" without this caveat.
 
-### 4. CoT corruption + pre-CoT patching (BoolQ)
-- **Random-token corruption** (n=800): flip **0.11**, mean logit drop 0.13, patch-recovery **0.89**. Scrambling the CoT's surface tokens rarely changes the answer, and patching the clean pre-CoT residual recovers it 89% of the time → the tokens were doing little causal work.
-- **Semantic inversion** (n=300): flip **0.43**, mean logit drop 0.41, patch-recovery **0.61**, corrupted accuracy drops to 0.51. Flipping the CoT's *meaning* changes the answer 3.8× more often, and the pre-CoT residual recovers it less often (0.89 → 0.61) — inversion injects genuine answer-relevant content, not noise.
+### 4. CoT corruption (BoolQ)
+- **Random-token corruption** (n=800): flip **0.11** [0.09, 0.13], mean logit drop 0.13. Scrambling the CoT's surface tokens rarely changes the answer.
+- **Semantic inversion** (n=300): flip **0.43** [0.37, 0.48], mean logit drop 0.41, corrupted accuracy drops to 0.51. Flipping the CoT's *meaning* changes the answer 3.8× more often — inversion injects genuine answer-relevant content, not noise.
+
+> **Correction — patch-recovery is not independent evidence.** Earlier versions also reported a "pre-CoT patch-recovery" rate (0.89 random / 0.61 invert) as separate evidence. It isn't: the patch overwrites the *prompt-prefix* residuals, but corruption only touches *CoT* tokens, so those prefix residuals are identical in the clean and corrupted runs and the patch is a **no-op**. Patch-recovery therefore equals **1 − flip** by construction (verified: exactly 1.000 of random rows; the invert 0.947 differs only from fp16 nondeterminism between two forward passes). We drop patch-recovery as a metric — flip rate and logit drop carry all the signal. Localizing *where* the CoT's effect enters would require patching the **CoT-span** residuals under a length-preserving corruption (random/shuffle), which we leave to future work.
 
 See **`fig5_corruption_bars.png`** and **`fig6_logitdrop_dist.png`**.
 
-**Interpretation.** A purely post-hoc CoT should be no more affected by semantic inversion than by random noise. The decisive 0.11 → 0.43 gap rejects that. But inversion flips < 50% of cases, so the CoT is *partially* faithful: it has a measurable causal role layered on top of an answer the model has largely committed to internally (consistent with §3).
+**Interpretation.** A purely post-hoc CoT should be no more affected by semantic inversion than by random noise. The decisive 0.11 → 0.43 flip gap rejects that. But inversion flips < 50% of cases, so the CoT is *partially* faithful: it has a measurable causal role layered on top of an answer the model has largely committed to internally (consistent with §3). The **paraphrase** control in §13 sharpens this: a meaning-preserving rewrite should flip at ≈ the random rate (≈0.11), not the invert rate.
 
 ---
 
@@ -88,13 +90,17 @@ See **`fig5_corruption_bars.png`** and **`fig6_logitdrop_dist.png`**.
 - **Single model, single seed.** All results are Llama-3-8B-Instruct, seed 42. No cross-family check was run (the optional section 11 was not executed).
 - **Tuned lens validity.** As above, decodability ≠ commitment; we have no control (e.g., shuffled-label or random-target lens) bounding how much the probe over-reads.
 - **Inversion confounds.** Inverted CoTs may differ in length/fluency from originals; we did not verify that inverted texts are coherent opposite arguments, nor add a *paraphrase* control (semantics preserved → should **not** flip).
-- **Patching is all-layer.** We patch every layer's pre-CoT residual at once, so we cannot localize *which* layers carry the causal effect.
+- **Pre-CoT patching is uninformative (see §4 correction).** The patch targets prompt-prefix residuals that corruption never alters, so patch-recovery ≡ 1−flip (a no-op). We report flip rate and logit drop only; localizing the CoT's causal effect needs a CoT-span patch under a length-preserving corruption.
 - **invert n = 300** (vs 800 for random) due to generation cost; CIs are correspondingly wider.
 
-## Suggested next improvements (highest leverage first)
-1. **Paraphrase control** for corruption: rewrite the CoT preserving meaning. A faithful pathway predicts paraphrase flip ≈ random (≈0.11) ≪ invert (0.43). This turns the corruption result from one-sided into a clean 3-condition design and directly tests the rationalization hypothesis.
-2. **Layer-resolved / windowed patching** instead of all-layer, to localize where the CoT's causal effect enters.
-3. **Tuned-lens control:** train a lens against shuffled targets (or report per-layer top-1 accuracy of the lens) to bound the "decodable ≠ committed" gap.
-4. **Cross-family generalization** (section 11): run the same commitment + corruption pipeline on Mistral-7B / Qwen2-7B / Gemma-2-9B to show the pattern is not Llama-specific.
-5. **Statistical test on the flip-rate gap** (bootstrap difference or two-proportion z) rather than reading non-overlapping CIs.
-6. **Scale invert to n=800** to match random, and add the `shuffle` corruption as a middle baseline (word order destroyed, tokens preserved).
+## Suggested next improvements
+
+**Implemented in notebook §13 (run pending — numbers to be filled in here):**
+1. **Paraphrase control** for corruption: rewrite the CoT preserving meaning. A faithful pathway predicts paraphrase flip ≈ random (≈0.11) ≪ invert (0.43) — a clean 3-condition test of the rationalization hypothesis. (cell 13c)
+2. **Tuned-lens control:** lens fit on shuffled targets + per-layer top-1 accuracy, to bound the "decodable ≠ committed" gap. (cell 13e)
+3. **Statistical test on the flip-rate gap** (two-proportion z + bootstrap difference) rather than reading non-overlapping CIs. (cell 13d)
+4. **Scale invert to n=800** to match random, plus a `shuffle` baseline (word order destroyed, tokens preserved). (cell 13b)
+
+**Still open:**
+5. **CoT-span layer-resolved patching** — patch the *clean CoT-span* residuals into a length-preserving (random/shuffle) corrupted run, per layer window, to localize where the CoT's effect enters. (The earlier all-layer *pre-CoT* patch was a no-op; see §4 correction.)
+6. **Cross-family generalization** (section 11): same commitment + corruption pipeline on Mistral-7B / Qwen2-7B / Gemma-2-9B to show the pattern is not Llama-specific.

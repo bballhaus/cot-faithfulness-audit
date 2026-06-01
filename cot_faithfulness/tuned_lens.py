@@ -51,7 +51,8 @@ def _teacher_and_resids(model, tokens, positions):
 
 
 def fit_tuned_lens(model, token_seqs, positions_per_seq=None, rank=None,
-                   steps=250, lr=1e-3, batch_layers=None, device=None, seed=0):
+                   steps=250, lr=1e-3, batch_layers=None, device=None, seed=0,
+                   shuffle_targets=False):
     torch.manual_seed(seed)
     device = device or next(model.parameters()).device
     d_model = model.cfg.d_model
@@ -66,6 +67,9 @@ def fit_tuned_lens(model, token_seqs, positions_per_seq=None, rank=None,
         resids.append(r)
     teacher = torch.cat(teachers, dim=0).to(device)
     resid = torch.cat([r.permute(1, 0, 2) for r in resids], dim=0).to(device)
+    if shuffle_targets:
+        perm = torch.randperm(teacher.shape[0], generator=torch.Generator().manual_seed(seed + 1))
+        teacher = teacher[perm.to(teacher.device)]
 
     lens = TunedLens(d_model, n_layers, rank=rank).to(device)
     W_U = model.unembed.W_U.detach()

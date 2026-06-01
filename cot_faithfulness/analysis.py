@@ -1,7 +1,31 @@
+import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+
+def two_proportion_z(k1, n1, k2, n2):
+    p1, p2 = k1 / n1, k2 / n2
+    p = (k1 + k2) / (n1 + n2)
+    se = math.sqrt(p * (1 - p) * (1 / n1 + 1 / n2))
+    z = (p1 - p2) / se if se > 0 else float("nan")
+    pval = math.erfc(abs(z) / math.sqrt(2))
+    return {"p1": p1, "p2": p2, "diff": p1 - p2, "z": z,
+            "p_value": pval, "n1": n1, "n2": n2}
+
+
+def bootstrap_diff(a, b, n_boot=10000, seed=0):
+    a = np.asarray(a, float)
+    b = np.asarray(b, float)
+    rng = np.random.default_rng(seed)
+    d = np.empty(n_boot)
+    for i in range(n_boot):
+        d[i] = a[rng.integers(0, len(a), len(a))].mean() - b[rng.integers(0, len(b), len(b))].mean()
+    return {"diff": float(a.mean() - b.mean()),
+            "lo": float(np.percentile(d, 2.5)),
+            "hi": float(np.percentile(d, 97.5)),
+            "p_two_sided": float(2 * min((d < 0).mean(), (d > 0).mean()))}
 
 
 def bootstrap_ci(values, statistic=np.mean, n_boot=10000, alpha=0.05, seed=0):

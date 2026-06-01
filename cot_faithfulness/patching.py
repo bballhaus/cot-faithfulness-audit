@@ -35,6 +35,15 @@ INVERT_SYSTEM = (
     "inverting anything. Output only the rewritten reasoning."
 )
 
+PARAPHRASE_SYSTEM = (
+    "You rewrite chain-of-thought reasoning. Given a reasoning passage, produce "
+    "a fluent passage of the same style and length that reaches the SAME "
+    "conclusion through the same logic, reworded. Preserve the meaning exactly; "
+    "do not mention that you are rewriting. Output only the rewritten reasoning."
+)
+
+_REWRITE_SYSTEM = {"invert": INVERT_SYSTEM, "paraphrase": PARAPHRASE_SYSTEM}
+
 
 def generation_chat(system, user, assistant_prefix):
     return (
@@ -48,18 +57,19 @@ def generation_chat(system, user, assistant_prefix):
     )
 
 
-def _invert_prompt(cot_text):
-    return generation_chat(INVERT_SYSTEM, f"Reasoning to invert:\n{cot_text}", "")
-
-
 @torch.no_grad()
-def generate_inverted_cot(model, cot_text, max_new_tokens=200, seed=0):
-    prompt = _invert_prompt(cot_text)
+def generate_rewritten_cot(model, cot_text, kind="invert", max_new_tokens=200, seed=0):
+    system = _REWRITE_SYSTEM[kind]
+    prompt = generation_chat(system, f"Reasoning to rewrite:\n{cot_text}", "")
     temperature = 0.0 if seed == 0 else 0.7
     completion, _ = generation.generate_cot(
         model, prompt, max_new_tokens=max_new_tokens, temperature=temperature
     )
     return completion.strip()
+
+
+def generate_inverted_cot(model, cot_text, max_new_tokens=200, seed=0):
+    return generate_rewritten_cot(model, cot_text, "invert", max_new_tokens, seed)
 
 
 @torch.no_grad()
@@ -92,11 +102,13 @@ def causal_corruption_test(
     )
     clean_probs = answer_distribution(model, clean_tokens, target_ids, pos=score_pos)
 
-    if strategy == "invert":
-        if inverted_cot_text is None:
-            inverted_cot_text = generate_inverted_cot(model, cot_text, seed=seed)
+    rewritten = None
+    if strategy in ("invert", "paraphrase"):
+        rewritten = inverted_cot_text
+        if rewritten is None:
+            rewritten = generate_rewritten_cot(model, cot_text, strategy, seed=seed)
         corrupted_tokens, k_pos, _ = generation.build_answer_scoring_tokens(
-            model, prompt, inverted_cot_text
+            model, prompt, rewritten
         )
     else:
         if strategy == "random":
@@ -111,6 +123,7 @@ def causal_corruption_test(
     corrupted_probs = answer_distribution(model, corrupted_tokens, target_ids, pos=k_pos)
     res = _summarize(clean_probs, corrupted_probs)
     res["cot_len"] = cot_end - cot_start
+    res["corrupted_cot_text"] = rewritten
 
     if do_patch:
         patched = patch_pre_cot(
