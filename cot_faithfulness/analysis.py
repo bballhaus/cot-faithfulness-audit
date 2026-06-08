@@ -138,8 +138,6 @@ def commitment_summary_ci(records):
 
 
 def faithfulness_accuracy(records):
-    # Proposal eval metric 3: are causally-influential (flipped-under-corruption)
-    # CoTs also more accurate? Positive r => genuine reasoning tracks correctness.
     df = pd.DataFrame(records)
     fl = df["flipped"].astype(bool)
     acc = df["correct_clean"].astype(float)

@@ -5,7 +5,6 @@ from transformer_lens import HookedTransformer
 
 DEFAULT_MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"
 
-# Cross-family check; use prompts.format_chat (these need their own chat templates).
 ALT_MODELS = {
     "mistral-7b": "mistralai/Mistral-7B-Instruct-v0.2",
     "gemma-2-9b": "google/gemma-2-9b-it",

@@ -71,8 +71,6 @@ def split_completion(completion):
 
 
 def build_answer_scoring_tokens(model, prompt, cot_text, answer_lead=ANSWER_LEAD):
-    # Returns (tokens, score_pos, cot_span); score_pos predicts the class after
-    # "Answer:" and cot_span excludes the answer line.
     prompt_tokens = model.to_tokens(prompt)
     cot_lead = prompt + (cot_text + " " if cot_text else "")
     cot_lead_tokens = model.to_tokens(cot_lead)
