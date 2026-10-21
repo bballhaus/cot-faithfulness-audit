@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "Is Chain-of-Thought Just Rationalization? A Mechanistic Faithfulness Audit of LLM Reasoning"
+authors:
+  - family-names: Ballhaus
+    given-names: Brooke
+  - family-names: Narain
+    given-names: Riya
+date-released: 2026-06-08
+repository-code: "https://github.com/bballhaus/cot-faithfulness-audit"
+license: MIT
+abstract: "We use the logit lens, a tuned lens, and CoT corruption with activation patching on Llama-3-8B-Instruct to test whether chain-of-thought reasoning causally drives model answers or is post-hoc rationalization."
