@@ -61,8 +61,16 @@ Several cells overwrite fixed filenames, and some cells read-modify-write `final
 
 ## Tests and checks
 
-There is no test suite, linter config, or CI. Cheapest sanity check (no GPU or model download, but
-needs the requirements installed): `python -c "import cot_faithfulness"`.
+- `tests/test_smoke.py` (pytest): CPU-only, no network, no HF token, runs in seconds. Imports every
+  module and tests the pure helpers (answer parsing, CoT/answer split, prompt formatting, target-token
+  collision check, commitment-layer detection, `TunedLens` init, corruption functions, bootstrap/
+  summary/threshold-sweep helpers, plots) using fake tokenizers and synthetic arrays; it never loads a model.
+- Run: install CPU torch (`pip install torch --index-url https://download.pytorch.org/whl/cpu`), then
+  `pip install -r requirements.txt pytest`, then `python -m pytest -q`.
+- CI: `.github/workflows/tests.yml` runs the same steps on Python 3.11 for pushes and PRs to `main`.
+  It uses no secrets.
+- `transformer-lens` is capped `<4`: 4.0 removed `HookedTransformer`, which `model.py` imports.
+- No linter config. Add tests for new pure helpers; keep tests model-free.
 
 ## Conventions
 
